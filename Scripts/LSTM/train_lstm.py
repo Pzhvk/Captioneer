@@ -25,7 +25,7 @@ corpus_bleu = try_import_nltk()
 
 def compute_bleu(references, hypotheses):
 	"""
-	references: list of list of reference token lists (for each candidate)
+	references: list of reference token lists (for each candidate)
 	hypotheses: list of candidate token lists
 	"""
 	if corpus_bleu is not None:
@@ -253,6 +253,6 @@ if __name__ == "__main__":
 		'feat_dim': args.feat_dim,
 		'feat_embed_dim': args.feat_embed_dim,
 		'max_len': args.max_len,
-		'resume_path': "/content/models/best_model_epoch9_bleu0.0547.pt"
+		'resume_path': ""
 	}
 	train_loop(cfg)
