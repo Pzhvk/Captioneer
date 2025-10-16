@@ -1,112 +1,96 @@
-# Captioneer
+# Captioneer: A Comparative Study of Image Captioning Models From LSTMs to Transformers
 
-Captioneer is an AI-powered image captioning project that generates descriptive captions for images using deep learning.
+This project provides a comprehensive, hands-on comparison of different neural network architectures for the task of image captioning. Starting with a simple LSTM baseline, the complexity is incrementally increased by adding an attention mechanism and finally implementing a modern Transformer-based decoder with pre-trained embeddings.
+
+The primary goal is to analyze and quantify the performance gains offered by each architectural advancement.
+
+---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Quickstart](#quickstart)
-- [Usage](#usage)
-- [Notebooks](#notebooks)
-- [Training & Models](#training--models)
-- [Data](#data)
-- [Evaluation](#evaluation)
-- [Repository Structure](#repository-structure)
-- [Contributing](#contributing)
+- [Project Overview](#project-overview)
+- [Models Compared](#models-compared)
+- [Final Results](#final-results)
+  - [Quantitative Analysis (Metrics)](#quantitative-analysis-metrics)
+  - [Qualitative Analysis (Examples)](#qualitative-analysis-examples)
+- [Analysis and Conclusion](#analysis-and-conclusion)
+- [Setup and Usage](#setup-and-usage)
+  - [1. Prerequisites](#1-prerequisites)
+  - [2. Data Setup](#2-data-setup)
+  - [3. Preprocessing](#3-preprocessing)
+  - [4. Training the Models](#4-training-the-models)
+  - [5. Final Evaluation](#5-final-evaluation)
+- [File Structure](#file-structure)
+- [Technologies Used](#technologies-used)
 - [License](#license)
-- [Contact](#contact)
 
-## Overview
+---
 
-Captioneer is built to provide easy-to-use tools and reference notebooks for generating natural-language captions for images. It demonstrates typical image-captioning workflows including data preprocessing, model training, inference, and evaluation.
+## Project Overview
 
-## Features
+Image captioning is a task that bridges the gap between computer vision and natural language processing. This project aims to methodically evaluate three distinct architectures on the **Flickr30k dataset**:
 
-- Notebook-driven experiments for rapid prototyping
-- Preprocessing utilities for common captioning datasets
-- Training recipes and evaluation metrics (e.g., BLEU, CIDEr)
-- Example inference scripts / notebook to generate captions from images
+1.  **A simple LSTM-based decoder** to establish a performance baseline.
+2.  **An LSTM decoder enhanced with a Bahdanau-style attention mechanism** to allow the model to focus on relevant parts of the image.
+3.  **A modern Transformer decoder** that leverages pre-trained word embeddings from **DistilBERT**, representing a state-of-the-art approach.
 
-## Quickstart
+By comparing these models, we can clearly observe the impact of architectural innovations on both the quantitative metrics (BLEU, METEOR, etc.) and the qualitative richness of the generated captions.
 
-1. Clone the repository
+## Models Compared
 
-   git clone https://github.com/Pzhvk/Captioneer.git
-   cd Captioneer
+### 1. LSTM (Baseline)
+-   **Encoder:** An identity layer that passes pre-extracted ResNet-50 features (2048-dim vector) to the decoder. This approach does not use spatial information.
+-   **Decoder:** A simple LSTM network that uses the single image feature vector to initialize its hidden state. It generates captions using greedy decode, one word at a time.
+-   **Purpose:** To set a performance floor and demonstrate the limitations of a non-attentive model.
 
-2. Create a Python virtual environment and install dependencies
+### 2. LSTM with Attention
+-   **Encoder:** A ResNet-50 CNN that extracts spatial features.
+-   **Decoder:** An LSTM network equipped with an **attention mechanism**. At each step of the caption generation, the decoder learns to focus on different parts of the image feature grid, allowing it to generate more contextually relevant words.
+-   **Purpose:** To show the significant performance boost provided by the attention mechanism.
 
-   python -m venv .venv
-   source .venv/bin/activate  # macOS / Linux
-   .\.venv\Scripts\activate  # Windows
+### 3. Transformer with Pre-trained Embeddings
+-   **Encoder:** A ResNet-50 CNN providing spatial image features, similar to the attention model.
+-   **Decoder:** A custom-built Transformer decoder (using `nn.TransformerDecoderLayer`) that is trained from scratch.
+-   **Embeddings:** The decoder's word embedding layer is initialized with pre-trained weights from Hugging Face's **`distilbert-base-uncased`**.
+-   **Purpose:** To demonstrate the performance of a modern architecture that combines pre-trained vision and language knowledge with a custom-trained sequence-to-sequence model.
 
-   pip install -r requirements.txt
+---
 
-3. Open the notebooks or run the scripts
+## Final Results
 
-   jupyter lab
+The models were trained and evaluated on the Flickr30k dataset. The final comparison was performed on the test set, judging each model's generated caption against all 5 ground-truth references for each image.
 
-## Usage
+### Quantitative Analysis (Metrics)
 
-Notebook: Open the included Jupyter notebooks and run the cells in order. Notebooks are the recommended way to explore data, models, and inference steps.
+The following chart summarizes the performance of each model across standard image captioning metrics. Higher is better for all metrics.
 
-Script (example):
+![Quantitative Results Table](assets/results_chart.png)
 
-```bash
-python scripts/generate_caption.py --image path/to/image.jpg --model path/to/model.ckpt
-```
+A visual comparison of the key metrics highlights the performance jump between architectures:
 
-The script should output a human-readable caption for the provided image. Replace paths with your local file locations.
+### Qualitative Analysis (Examples)
 
-## Notebooks
+Below are some randomly selected examples from the test set, showing the captions generated by each model.
 
-This repo is focused around Jupyter notebooks (see the `notebooks/` directory). Notebooks typically include:
+**Example 1 (Baseline):**
+![Qualitative Example 1](assets/example_1.png)
 
-- Data loading and preprocessing examples
-- Model definition and training loops
-- Inference examples and visualization of generated captions
+**Example 2 (LSTM + Attention):**
+![Qualitative Example 2](assets/example_2.png)
 
-## Training & Models
+**Example 3 (Transformer):**
+![Qualitative Example 2](assets/example_3.png)
 
-- Training recipes and checkpoints, if included, are typically under `models/` or described in the notebooks.
-- Use the notebooks to run training on a GPU-enabled machine for reasonable performance.
+---
 
-## Data
+## Analysis and Conclusion
 
-Common datasets used with this repository include COCO and Flickr30k. For experimentation, you can use small subsets of these datasets locally. See the notebooks for dataset download and preprocessing instructions.
+The results clearly demonstrate the evolution of image captioning models:
 
-## Evaluation
+-   The **Baseline LSTM** struggled significantly, often producing single-word or grammatically poor captions. This was expected, as it lacks a mechanism to focus on different parts of the image as it generates the sequence, leading to a BLEU-4 score near zero.
+-   The **LSTM with Attention** was a massive improvement. By learning to focus on relevant image regions, it was able to generate much more coherent and accurate captions, achieving a respectable **BLEU-4 score of 0.205**.
+-   The **Transformer model** provided a further step up, achieving the highest scores across all major metrics with a **BLEU-4 of 0.224**. The combination of the powerful Transformer architecture and the rich linguistic prior from DistilBERT's embeddings allowed it to produce the most descriptive and accurate captions.
 
-Standard captioning metrics are supported (BLEU, CIDEr, METEOR, ROUGE-L). Evaluation scripts / notebook cells will compute these metrics comparing generated captions to reference captions.
+This study confirms that architectural advancements, particularly the attention mechanism and the Transformer, provide substantial and measurable improvements in the complex task of image captioning.
 
-## Repository Structure
-
-- notebooks/       - Jupyter notebooks for experiments and demos
-- scripts/         - Utility scripts for generation, preprocessing, and evaluation
-- src/             - Source code for models and helpers
-- data/            - Data download and preprocessing helpers (not included)
-- models/          - Model checkpoints (not included)
-- requirements.txt - Python dependencies
-
-(If any of the above directories are not present in this repository yet, they represent recommended organization.)
-
-## Contributing
-
-Contributions are welcome. If you'd like to contribute:
-
-1. Open an issue describing the feature or bug.
-2. Create a branch for your work: `git checkout -b feature/your-feature`
-3. Open a pull request describing your changes and why they help the project.
-
-Please follow standard Python project conventions and keep changes well-documented.
-
-## License
-
-This project is licensed under the MIT License. See LICENSE for details.
-
-## Contact
-
-Maintainer: Pzhvk
-
-For questions or help, open an issue in the repository.
+---
