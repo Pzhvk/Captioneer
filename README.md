@@ -68,7 +68,7 @@ The models were trained and evaluated on the Flickr30k dataset. The final compar
 The following chart summarizes the performance of each model across standard image captioning metrics. Higher is better for all metrics.
 
 <br>
-<img src="assets/results_chart.png" alt="Qualitative Example 1" width="1400">
+<img src="assets/evaluation_chart.png" alt="Qualitative Example 1" width="1400">
 <br>
 
 ### Qualitative Analysis (Examples)
